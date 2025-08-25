@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: 'http://localhost:8080', // Auth service port
+  baseURL: 'http://localhost:8080', // API Gateway port
   headers: {
     'Content-Type': 'application/json',
   },
@@ -46,45 +46,57 @@ export const authAPI = {
     lastName: string;
     acceptTerms: boolean;
     marketingConsent?: boolean;
-  }) => api.post('/users/register', userData),
+  }) => api.post('/auth/api/v1/users/register', userData),
 
-  // User login
+  // User login using OAuth2 password grant
   login: (credentials: {
     usernameOrEmail: string;
     password: string;
     rememberMe?: boolean;
     clientId?: string;
-  }) => api.post('/users/login', credentials),
+  }) => {
+    const formData = new FormData();
+    formData.append('grant_type', 'password');
+    formData.append('username', credentials.usernameOrEmail);
+    formData.append('password', credentials.password);
+    formData.append('client_id', credentials.clientId || 'smartdrive-web');
+    
+    return api.post('/auth/oauth2/token', formData, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+  },
 
   // User logout
-  logout: () => api.post('/users/logout'),
+  logout: () => api.post('/auth/api/v1/users/logout'),
 
   // Get user profile
-  getProfile: () => api.get('/users/profile'),
+  getProfile: () => api.get('/auth/api/v1/users/profile'),
 
   // Update user profile
-  updateProfile: (profileData: any) => api.put('/users/profile', profileData),
+  updateProfile: (profileData: any) => api.put('/auth/api/v1/users/profile', profileData),
 
   // Change password
   changePassword: (passwords: {
     currentPassword: string;
     newPassword: string;
-  }) => api.post('/users/change-password', passwords),
+  }) => api.post('/auth/api/v1/users/change-password', passwords),
 
   // Forgot password
-  forgotPassword: (email: string) => api.post('/users/forgot-password', { email }),
+  forgotPassword: (email: string) => api.post('/auth/api/v1/users/forgot-password', { email }),
 
   // Reset password
   resetPassword: (data: {
     token: string;
     newPassword: string;
-  }) => api.post('/users/reset-password', data),
+  }) => api.post('/auth/api/v1/users/reset-password', data),
 
   // Verify email
-  verifyEmail: (token: string) => api.get(`/users/verify-email?token=${token}`),
+  verifyEmail: (token: string) => api.get(`/auth/api/v1/users/verify-email?token=${token}`),
 
   // Delete account
-  deleteAccount: () => api.delete('/users/account'),
+  deleteAccount: () => api.delete('/auth/api/v1/users/account'),
 };
 
 // OAuth2 API endpoints
@@ -98,7 +110,7 @@ export const oauth2API = {
     state?: string;
     codeChallenge?: string;
     codeChallengeMethod?: string;
-  }) => api.get('/oauth2/authorize', { params }),
+  }) => api.get('/auth/oauth2/authorize', { params }),
 
   // Exchange code for token
   getToken: (data: {
@@ -107,19 +119,19 @@ export const oauth2API = {
     redirectUri: string;
     clientId: string;
     codeVerifier?: string;
-  }) => api.post('/oauth2/token', data),
+  }) => api.post('/auth/oauth2/token', data),
 
   // Get user info
-  getUserInfo: () => api.get('/oauth2/userinfo'),
+  getUserInfo: () => api.get('/auth/oauth2/userinfo'),
 
   // Introspect token
-  introspectToken: (token: string) => api.post('/oauth2/introspect', { token }),
+  introspectToken: (token: string) => api.post('/auth/oauth2/introspect', { token }),
 
   // Revoke token
-  revokeToken: (token: string) => api.post('/oauth2/revoke', { token }),
+  revokeToken: (token: string) => api.post('/auth/oauth2/revoke', { token }),
 
   // Register OAuth2 client
-  registerClient: (clientData: any) => api.post('/oauth2/register', clientData),
+  registerClient: (clientData: any) => api.post('/auth/oauth2/register', clientData),
 };
 
 export default api;
