@@ -42,11 +42,10 @@ export const authAPI = {
     username: string;
     email: string;
     password: string;
+    confirmPassword: string;
     firstName: string;
     lastName: string;
-    acceptTerms: boolean;
-    marketingConsent?: boolean;
-  }) => api.post('/auth/api/v1/users/register', userData),
+  }) => api.post('/api/v1/users/register', userData),
 
   // User login using OAuth2 password grant
   login: (credentials: {
@@ -93,7 +92,7 @@ export const authAPI = {
   }) => api.post('/auth/api/v1/users/reset-password', data),
 
   // Verify email
-  verifyEmail: (token: string) => api.get(`/auth/api/v1/users/verify-email?token=${token}`),
+  verifyEmail: (token: string) => api.get(`/api/v1/users/verify-email?token=${token}`),
 
   // Delete account
   deleteAccount: () => api.delete('/auth/api/v1/users/account'),

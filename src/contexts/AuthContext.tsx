@@ -18,10 +18,9 @@ interface AuthContextType {
     username: string;
     email: string;
     password: string;
+    confirmPassword: string;
     firstName: string;
     lastName: string;
-    acceptTerms: boolean;
-    marketingConsent?: boolean;
   }) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (profileData: any) => Promise<void>;
@@ -94,10 +93,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     username: string;
     email: string;
     password: string;
+    confirmPassword: string;
     firstName: string;
     lastName: string;
-    acceptTerms: boolean;
-    marketingConsent?: boolean;
   }) => {
     try {
       const response = await authAPI.register(userData);

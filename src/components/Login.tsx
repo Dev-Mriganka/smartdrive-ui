@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, LogIn, Smartphone, Lock, Mail } from 'lucide-react';
+import AnimatedBackground from './AnimatedBackground';
+import ThemeToggle from './ThemeToggle';
 
 const Login: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -42,8 +44,10 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 animate-fade-in-up">
-      <div className="form-container w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center p-4 animate-fade-in-up relative">
+      <AnimatedBackground />
+      <ThemeToggle />
+      <div className="form-container w-full max-w-md bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 dark:border-gray-700/20">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="mx-auto mb-4">
@@ -54,14 +58,14 @@ const Login: React.FC = () => {
             />
           </div>
           <h1 className="brand-logo mb-2">SmartDrive</h1>
-          <p className="brand-subtitle">Your AI-Powered Cloud Storage</p>
+          <p className="brand-subtitle dark:text-gray-300">Your AI-Powered Cloud Storage</p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Email Field */}
           <div className="space-y-2">
-            <label htmlFor="email" className="block text-sm font-semibold text-gray-700">
+            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
               Email Address
             </label>
             <div className="relative">
@@ -81,7 +85,7 @@ const Login: React.FC = () => {
 
           {/* Password Field */}
           <div className="space-y-2">
-            <label htmlFor="password" className="block text-sm font-semibold text-gray-700">
+            <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
               Password
             </label>
             <div className="relative">

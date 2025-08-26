@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, UserCheck, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import AnimatedBackground from './AnimatedBackground';
+import ThemeToggle from './ThemeToggle';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -11,8 +13,6 @@ const Register: React.FC = () => {
     confirmPassword: '',
     firstName: '',
     lastName: '',
-    acceptTerms: false,
-    marketingConsent: false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -41,10 +41,6 @@ const Register: React.FC = () => {
       setError('Password must be at least 8 characters long');
       return false;
     }
-    if (!formData.acceptTerms) {
-      setError('You must accept the terms and conditions');
-      return false;
-    }
     return true;
   };
 
@@ -61,10 +57,9 @@ const Register: React.FC = () => {
         username: formData.username,
         email: formData.email,
         password: formData.password,
+        confirmPassword: formData.confirmPassword,
         firstName: formData.firstName,
         lastName: formData.lastName,
-        acceptTerms: formData.acceptTerms,
-        marketingConsent: formData.marketingConsent,
       });
       
       setSuccess('Registration successful! Please check your email for verification.');
@@ -84,12 +79,13 @@ const Register: React.FC = () => {
     formData.password.trim() && 
     formData.confirmPassword.trim() && 
     formData.firstName.trim() && 
-    formData.lastName.trim() && 
-    formData.acceptTerms;
+    formData.lastName.trim();
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 animate-fade-in-up">
-      <div className="form-container w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center p-4 animate-fade-in-up relative">
+      <AnimatedBackground />
+      <ThemeToggle />
+      <div className="form-container w-full max-w-md bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 dark:border-gray-700/20">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="mx-auto mb-4">
@@ -100,8 +96,8 @@ const Register: React.FC = () => {
             />
           </div>
           <h1 className="brand-logo mb-2">Create Account</h1>
-          <p className="brand-subtitle">Join SmartDrive today</p>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="brand-subtitle dark:text-gray-300">Join SmartDrive today</p>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             Join us and start managing your files with AI
           </p>
         </div>
@@ -250,45 +246,6 @@ const Register: React.FC = () => {
             </div>
           </div>
 
-          {/* Terms and Marketing */}
-          <div className="space-y-4">
-            <div className="flex items-start">
-              <input
-                id="acceptTerms"
-                name="acceptTerms"
-                type="checkbox"
-                required
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-1"
-                checked={formData.acceptTerms}
-                onChange={handleInputChange}
-              />
-              <label htmlFor="acceptTerms" className="ml-2 block text-sm text-gray-700">
-                I agree to the{' '}
-                <Link to="/terms" className="text-blue-600 hover:text-blue-700 font-medium">
-                  Terms and Conditions
-                </Link>{' '}
-                and{' '}
-                <Link to="/privacy" className="text-blue-600 hover:text-blue-700 font-medium">
-                  Privacy Policy
-                </Link>
-              </label>
-            </div>
-
-            <div className="flex items-start">
-              <input
-                id="marketingConsent"
-                name="marketingConsent"
-                type="checkbox"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-1"
-                checked={formData.marketingConsent}
-                onChange={handleInputChange}
-              />
-              <label htmlFor="marketingConsent" className="ml-2 block text-sm text-gray-700">
-                I would like to receive updates about new features and promotions
-              </label>
-            </div>
-          </div>
-
           {/* Submit Button */}
           <button
             type="submit"
@@ -298,26 +255,23 @@ const Register: React.FC = () => {
             {isLoading ? (
               <>
                 <div className="loading-spinner mr-2"></div>
-                <span>Creating account...</span>
+                <span>Creating Account...</span>
               </>
             ) : (
-              <>
-                <UserCheck className="h-5 w-5 mr-2" />
-                <span>Create Account</span>
-              </>
+              'Create Account'
             )}
           </button>
-
-          {/* Footer */}
-          <div className="text-center">
-            <p className="text-gray-600">
-              Already have an account?{' '}
-              <Link to="/login" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors">
-                Sign in here
-              </Link>
-            </p>
-          </div>
         </form>
+
+        {/* Footer */}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            Already have an account?{' '}
+            <Link to="/login" className="font-medium text-blue-600 hover:text-blue-700">
+              Sign In
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
