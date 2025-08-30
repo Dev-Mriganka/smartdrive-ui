@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 /* Modern Design System */
 :root {
@@ -6,14 +7,24 @@
   --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   --glass-bg: rgba(255, 255, 255, 0.1);
   --glass-border: rgba(255, 255, 255, 0.2);
-  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.1);
-  --shadow-strong: 0 20px 40px rgba(0, 0, 0, 0.15);
+  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.15);
+  --shadow-3xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --blur-sm: blur(4px);
+  --blur-md: blur(8px);
+  --blur-lg: blur(16px);
+  --blur-xl: blur(24px);
 }
 
 /* Base Styles */
 body {
-  @apply bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  @apply antialiased;
+}
+
+/* Custom shadow utilities */
+.shadow-3xl {
+  box-shadow: var(--shadow-3xl);
 }
 
 /* Modern Card Design */
@@ -164,4 +175,72 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   @apply from-blue-500 to-indigo-600;
+}
+
+/* OAuth2 Specific Styles */
+.oauth-button {
+  @apply w-full flex items-center justify-center space-x-3 py-3 px-4;
+  @apply border border-gray-300 dark:border-gray-600 rounded-xl;
+  @apply text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700;
+  @apply hover:bg-gray-50 dark:hover:bg-gray-600;
+  @apply transition-all duration-300 transform hover:scale-[1.02];
+  @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
+  @apply shadow-lg hover:shadow-xl;
+}
+
+.oauth-divider {
+  @apply my-8 flex items-center;
+}
+
+.oauth-divider-line {
+  @apply flex-1 border-t border-gray-300 dark:border-gray-600;
+}
+
+.oauth-divider-text {
+  @apply mx-4 text-sm text-gray-500 dark:text-gray-400 font-medium;
+}
+
+/* Google-specific colors */
+.google-button {
+  @apply oauth-button;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
+}
+
+.google-button:hover {
+  background: linear-gradient(135deg, rgba(248, 250, 252, 0.95) 0%, rgba(241, 245, 249, 0.9) 100%);
+  box-shadow: 0 8px 25px rgba(66, 133, 244, 0.15);
+}
+
+/* Authentication status styles */
+.auth-status-card {
+  @apply dashboard-card bg-gradient-to-r from-green-50 to-blue-50;
+  @apply dark:from-green-900/20 dark:to-blue-900/20;
+  @apply border-l-4 border-green-400;
+}
+
+/* Callback page styles */
+.callback-container {
+  @apply min-h-screen flex items-center justify-center p-4;
+  @apply bg-gray-50 dark:bg-gray-900;
+}
+
+.callback-card {
+  @apply w-full max-w-md p-8 bg-white dark:bg-gray-800;
+  @apply rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700;
+}
+
+/* Enhanced animations for OAuth2 flow */
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slideInFromTop 0.4s ease-out;
 }

@@ -7,6 +7,7 @@ import Register from './components/Register';
 import EmailVerification from './components/EmailVerification';
 import Dashboard from './components/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
+import GoogleCallback from './components/GoogleCallback';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/verify-email" element={<EmailVerification />} />
+              <Route path="/auth/google/callback" element={<GoogleCallback />} />
               <Route
                 path="/dashboard"
                 element={
