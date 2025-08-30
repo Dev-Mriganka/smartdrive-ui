@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authAPI } from '../services/api';
+import { authAPI, googleAuthAPI } from '../services/api';
 
 interface User {
   id: string;
@@ -24,6 +24,9 @@ interface AuthContextType {
   }) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (profileData: any) => Promise<void>;
+  // Google OAuth2 methods
+  loginWithGoogle: () => Promise<void>;
+  handleGoogleCallback: (searchParams: URLSearchParams) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -74,18 +77,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         rememberMe,
       });
 
-      const { accessToken, refreshToken, user: userData } = response.data;
+      const { access_token, refresh_token } = response.data;
 
       // Store tokens
-      localStorage.setItem('accessToken', accessToken);
-      if (refreshToken) {
-        localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('accessToken', access_token);
+      if (refresh_token) {
+        localStorage.setItem('refreshToken', refresh_token);
       }
 
-      // Set user data
-      setUser(userData);
+      // Get user profile after successful login
+      try {
+        const profileResponse = await authAPI.getProfile();
+        setUser(profileResponse.data);
+      } catch (profileError) {
+        console.error('Failed to get user profile after login:', profileError);
+        // Still consider login successful if we have tokens
+        setUser({
+          id: 'temp',
+          username: usernameOrEmail,
+          email: usernameOrEmail,
+          firstName: '',
+          lastName: ''
+        });
+      }
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Login failed');
+      throw new Error(error.response?.data?.error_description || error.response?.data?.message || 'Login failed');
     }
   };
 
@@ -101,7 +117,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await authAPI.register(userData);
       return response.data;
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Registration failed');
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          'Registration failed';
+      throw new Error(errorMessage);
     }
   };
 
@@ -127,6 +146,55 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Google OAuth2 login - redirect to Google authorization URL
+  const loginWithGoogle = async () => {
+    try {
+      const redirectUri = `${window.location.origin}/auth/google/callback`;
+      const response = await googleAuthAPI.getGoogleLoginUrl(redirectUri);
+      const { authorization_url } = response.data;
+      
+      // Redirect to Google OAuth2 authorization URL
+      window.location.href = authorization_url;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error_description || 'Failed to initiate Google login');
+    }
+  };
+
+  // Handle Google OAuth2 callback and complete authentication
+  const handleGoogleCallback = async (searchParams: URLSearchParams) => {
+    try {
+      const response = await googleAuthAPI.processGoogleRedirect(searchParams);
+      const { access_token, refresh_token, user: userData } = response.data;
+
+      // Store tokens
+      localStorage.setItem('accessToken', access_token);
+      if (refresh_token) {
+        localStorage.setItem('refreshToken', refresh_token);
+      }
+
+      // Set user data
+      if (userData) {
+        setUser({
+          id: userData.user_id || userData.id,
+          username: userData.username,
+          email: userData.email,
+          firstName: userData.first_name || userData.firstName || '',
+          lastName: userData.last_name || userData.lastName || ''
+        });
+      } else {
+        // Fallback: get profile from API
+        try {
+          const profileResponse = await authAPI.getProfile();
+          setUser(profileResponse.data);
+        } catch (profileError) {
+          console.error('Failed to get profile after Google login:', profileError);
+        }
+      }
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to complete Google authentication');
+    }
+  };
+
   const value: AuthContextType = {
     user,
     isAuthenticated,
@@ -135,6 +203,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     logout,
     updateProfile,
+    loginWithGoogle,
+    handleGoogleCallback,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

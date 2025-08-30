@@ -47,23 +47,16 @@ export const authAPI = {
     lastName: string;
   }) => api.post('/api/v1/users/register', userData),
 
-  // User login using OAuth2 password grant
+  // User login using custom auth endpoint
   login: (credentials: {
     usernameOrEmail: string;
     password: string;
     rememberMe?: boolean;
-    clientId?: string;
   }) => {
-    const formData = new FormData();
-    formData.append('grant_type', 'password');
-    formData.append('username', credentials.usernameOrEmail);
-    formData.append('password', credentials.password);
-    formData.append('client_id', credentials.clientId || 'smartdrive-web');
-    
-    return api.post('/auth/oauth2/token', formData, {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+    return api.post('/api/v1/auth/login', {
+      usernameOrEmail: credentials.usernameOrEmail,
+      password: credentials.password,
+      rememberMe: credentials.rememberMe || false,
     });
   },
 
@@ -71,31 +64,31 @@ export const authAPI = {
   logout: () => api.post('/auth/api/v1/users/logout'),
 
   // Get user profile
-  getProfile: () => api.get('/auth/api/v1/users/profile'),
+  getProfile: () => api.get('/api/v1/users/profile'),
 
   // Update user profile
-  updateProfile: (profileData: any) => api.put('/auth/api/v1/users/profile', profileData),
+  updateProfile: (profileData: any) => api.put('/api/v1/users/profile', profileData),
 
   // Change password
   changePassword: (passwords: {
     currentPassword: string;
     newPassword: string;
-  }) => api.post('/auth/api/v1/users/change-password', passwords),
+  }) => api.post('/api/v1/users/change-password', passwords),
 
   // Forgot password
-  forgotPassword: (email: string) => api.post('/auth/api/v1/users/forgot-password', { email }),
+  forgotPassword: (email: string) => api.post('/api/v1/users/forgot-password', { email }),
 
   // Reset password
   resetPassword: (data: {
     token: string;
     newPassword: string;
-  }) => api.post('/auth/api/v1/users/reset-password', data),
+  }) => api.post('/api/v1/users/reset-password', data),
 
   // Verify email
   verifyEmail: (token: string) => api.get(`/api/v1/users/verify-email?token=${token}`),
 
   // Delete account
-  deleteAccount: () => api.delete('/auth/api/v1/users/account'),
+  deleteAccount: () => api.delete('/api/v1/users/profile'),
 };
 
 // OAuth2 API endpoints
@@ -131,6 +124,38 @@ export const oauth2API = {
 
   // Register OAuth2 client
   registerClient: (clientData: any) => api.post('/auth/oauth2/register', clientData),
+};
+
+// Google OAuth2 Social Login API endpoints
+export const googleAuthAPI = {
+  // Get Google OAuth2 authorization URL
+  getGoogleLoginUrl: (redirectUri?: string) => {
+    const params = redirectUri ? `?redirectUri=${encodeURIComponent(redirectUri)}` : '';
+    return api.get(`/api/v1/auth/social/google/login-url${params}`);
+  },
+
+  // Handle Google OAuth2 callback (POST)
+  handleGoogleCallback: (data: {
+    code: string;
+    state?: string;
+  }) => api.post('/api/v1/auth/social/google/callback', data),
+
+  // Handle Google OAuth2 callback via URL params (for browser redirects)
+  processGoogleRedirect: (searchParams: URLSearchParams) => {
+    const code = searchParams.get('code');
+    const state = searchParams.get('state');
+    const error = searchParams.get('error');
+    
+    if (error) {
+      throw new Error(`Google OAuth2 error: ${error}`);
+    }
+    
+    if (!code) {
+      throw new Error('No authorization code received from Google');
+    }
+    
+    return googleAuthAPI.handleGoogleCallback({ code, state: state || undefined });
+  },
 };
 
 export default api;
