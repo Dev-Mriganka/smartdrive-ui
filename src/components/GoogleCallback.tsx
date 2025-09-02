@@ -1,113 +1,139 @@
+import { CheckCircle, Loader2, XCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import ThemeToggle from './ThemeToggle';
 
 const GoogleCallback: React.FC = () => {
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [error, setError] = useState<string>('');
+  const [searchParams] = useSearchParams();
   const { handleGoogleCallback } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     const processCallback = async () => {
       try {
-        // Get search params from URL
-        const searchParams = new URLSearchParams(location.search);
+        // Check if we have tokens in URL parameters (from backend redirect)
+        const accessToken = searchParams.get('access_token');
+
+        const email = searchParams.get('email');
         
-        if (searchParams.has('error')) {
-          const errorMsg = searchParams.get('error') || 'Unknown error';
-          setError(`Google login failed: ${errorMsg}`);
-          setStatus('error');
-          return;
+        if (accessToken && email) {
+          console.log('🔗 Processing Google callback with tokens from URL');
+          // Update auth context by calling handleGoogleCallback
+          await handleGoogleCallback(accessToken);
+          console.log('✅ Auth context updated successfully');
+          setStatus('success');
+          
+          // Check if this is a popup window
+          if (window.opener) {
+            // This is a popup window - notify parent and close
+            setTimeout(() => {
+              window.opener.postMessage({ type: 'GOOGLE_LOGIN_SUCCESS' }, window.location.origin);
+              window.close();
+            }, 1500);
+          } else {
+            // This is a direct navigation - redirect to dashboard immediately
+            console.log('🔄 Redirecting to dashboard...');
+            navigate('/dashboard');
+          }
+        } else {
+          // Process callback normally (for popup flow)
+          const code = searchParams.get('code');
+          if (code) {
+            await handleGoogleCallback(code);
+          }
+          setStatus('success');
+          
+          // Check if this is a popup window
+          if (window.opener) {
+            // This is a popup window - notify parent and close
+            setTimeout(() => {
+              window.opener.postMessage({ type: 'GOOGLE_LOGIN_SUCCESS' }, window.location.origin);
+              window.close();
+            }, 1500);
+          } else {
+            // This is a direct navigation - redirect to dashboard
+            setTimeout(() => {
+              navigate('/dashboard');
+            }, 2000);
+          }
         }
-        
-        if (!searchParams.has('code')) {
-          setError('No authorization code received from Google');
-          setStatus('error');
-          return;
-        }
-        
-        // Process the callback
-        await handleGoogleCallback(searchParams);
-        setStatus('success');
-        
-        // Redirect to dashboard after success
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 2000);
-      } catch (err) {
-        console.error('Google callback error:', err);
-        setError(err instanceof Error ? err.message : 'Authentication failed');
+      } catch (error) {
         setStatus('error');
+        setErrorMessage(error instanceof Error ? error.message : 'Authentication failed');
+        
+        // Check if this is a popup window
+        if (window.opener) {
+          // This is a popup window - notify parent and close
+          setTimeout(() => {
+            window.opener.postMessage({ type: 'GOOGLE_LOGIN_ERROR', error: errorMessage }, window.location.origin);
+            window.close();
+          }, 3000);
+        } else {
+          // This is a direct navigation - redirect to login
+          setTimeout(() => {
+            navigate('/login');
+          }, 3000);
+        }
       }
     };
 
     processCallback();
-  }, [handleGoogleCallback, location.search, navigate]);
+  }, [searchParams, handleGoogleCallback, navigate, errorMessage]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-900">
-      <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700">
-        <div className="text-center">
-          <div className="mb-6">
-            <img 
-              src="/smartdrive-logo.png" 
-              alt="SmartDrive Logo" 
-              className="h-16 w-auto mx-auto"
-            />
-          </div>
-          
-          {status === 'loading' && (
-            <>
-              <div className="loading-spinner mx-auto mb-4"></div>
-              <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
-                Completing Google Authentication
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300">
-                Please wait while we verify your Google credentials...
-              </p>
-            </>
-          )}
-          
-          {status === 'success' && (
-            <>
-              <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900">
-                <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-              </div>
-              <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
-                Authentication Successful!
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300">
-                You've successfully signed in with Google. Redirecting to your dashboard...
-              </p>
-            </>
-          )}
-          
-          {status === 'error' && (
-            <>
-              <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900">
-                <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-              </div>
-              <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
-                Authentication Failed
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
-                {error || 'There was a problem signing in with Google.'}
-              </p>
-              <button
-                onClick={() => navigate('/login')}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Return to Login
-              </button>
-            </>
-          )}
-        </div>
+    <div className="min-h-screen gradient-bg flex items-center justify-center p-4 relative">
+      <ThemeToggle />
+      <div className="card w-full max-w-md p-8 text-center animate-fade-in-up">
+        {status === 'loading' && (
+          <>
+            <div className="mb-6">
+              <Loader2 className="h-16 w-16 text-blue-600 animate-spin mx-auto" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Completing Authentication
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Please wait while we complete your Google sign-in...
+            </p>
+          </>
+        )}
+
+        {status === 'success' && (
+          <>
+            <div className="mb-6">
+              <CheckCircle className="h-16 w-16 text-green-600 mx-auto" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Authentication Successful!
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Welcome to SmartDrive! Redirecting to dashboard...
+            </p>
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+              <div className="bg-green-600 h-2 rounded-full animate-pulse"></div>
+            </div>
+          </>
+        )}
+
+        {status === 'error' && (
+          <>
+            <div className="mb-6">
+              <XCircle className="h-16 w-16 text-red-600 mx-auto" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Authentication Failed
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              {errorMessage}
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Redirecting to login page...
+            </p>
+          </>
+        )}
       </div>
     </div>
   );

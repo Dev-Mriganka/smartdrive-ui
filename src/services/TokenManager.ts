@@ -44,7 +44,7 @@ class TokenManager {
    */
   async makeAuthenticatedRequest(url: string, options: RequestOptions = {}): Promise<Response | null> {
     // Add access token to request headers
-    const headers = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...options.headers,
     };

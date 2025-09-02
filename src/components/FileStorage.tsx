@@ -1,103 +1,35 @@
 import {
     Bell,
-    CheckCircle,
     ChevronRight,
-    Clock,
-    Cloud,
-    Cpu,
+    Download,
     FileText,
     Folder,
     Grid3X3,
     HardDrive,
     Image,
+    LogOut,
+    MoreVertical,
+    Search,
     Settings,
     Star,
+    Trash2,
     Upload,
-    User,
-    XCircle,
-    LogOut
+    User
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
-const Dashboard: React.FC = () => {
+const FileStorage: React.FC = () => {
   const { user, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
-
-  // Mock data for AI tasks
-  const aiTasks = [
-    {
-      id: 'AI-001',
-      fileName: 'Project_Proposal_V2.pdf',
-      taskType: 'Summarization',
-      status: 'Completed',
-      date: '2024-07-28',
-      icon: CheckCircle,
-      color: 'text-green-400'
-    },
-    {
-      id: 'AI-002',
-      fileName: 'Marketing_Campaign_Image.jpg',
-      taskType: 'Image Tagging',
-      status: 'Completed',
-      date: '2024-07-27',
-      icon: CheckCircle,
-      color: 'text-green-400'
-    },
-    {
-      id: 'AI-003',
-      fileName: 'Financial_Report_Q2.docx',
-      taskType: 'Data Extraction',
-      status: 'Failed',
-      date: '2024-07-26',
-      icon: XCircle,
-      color: 'text-red-400'
-    },
-    {
-      id: 'AI-004',
-      fileName: 'Client_Contract_Draft.pdf',
-      taskType: 'Legal Analysis',
-      status: 'Pending',
-      date: '2024-07-25',
-      icon: Clock,
-      color: 'text-orange-400'
-    },
-    {
-      id: 'AI-005',
-      fileName: 'Product_Launch_Banner.png',
-      taskType: 'Image Resizing',
-      status: 'Completed',
-      date: '2024-07-24',
-      icon: CheckCircle,
-      color: 'text-green-400'
-    },
-    {
-      id: 'AI-006',
-      fileName: 'Research_Paper_AI_Ethics.pdf',
-      taskType: 'Keyword Extraction',
-      status: 'Completed',
-      date: '2024-07-23',
-      icon: CheckCircle,
-      color: 'text-green-400'
-    },
-    {
-      id: 'AI-007',
-      fileName: 'Team_Meeting_Notes.docx',
-      taskType: 'Sentiment Analysis',
-      status: 'Pending',
-      date: '2024-07-22',
-      icon: Clock,
-      color: 'text-orange-400'
-    }
-  ];
 
   const storageStats = [
     {
       label: 'Total Files',
       value: '1,245',
-      subtitle: 'Across documents and images',
+      subtitle: 'Across all categories',
       icon: FileText,
       color: 'text-blue-400'
     },
@@ -110,18 +42,61 @@ const Dashboard: React.FC = () => {
       progress: 15
     },
     {
-      label: 'AI Tasks Completed',
-      value: '345',
-      subtitle: 'Last 30 days',
-      icon: Cpu,
+      label: 'Documents',
+      value: '856',
+      subtitle: 'PDFs, Word docs, etc.',
+      icon: FileText,
       color: 'text-purple-400'
     },
     {
-      label: 'Recent Uploads',
-      value: '15',
-      subtitle: 'In the last week',
-      icon: Cloud,
+      label: 'Images',
+      value: '389',
+      subtitle: 'Photos and graphics',
+      icon: Image,
       color: 'text-orange-400'
+    }
+  ];
+
+  const recentFiles = [
+    {
+      name: 'Project_Proposal_V2.pdf',
+      type: 'PDF',
+      size: '2.4 MB',
+      date: '2024-07-28',
+      icon: FileText,
+      color: 'text-red-400'
+    },
+    {
+      name: 'Marketing_Campaign_Image.jpg',
+      type: 'Image',
+      size: '1.8 MB',
+      date: '2024-07-27',
+      icon: Image,
+      color: 'text-green-400'
+    },
+    {
+      name: 'Financial_Report_Q2.docx',
+      type: 'Document',
+      size: '3.2 MB',
+      date: '2024-07-26',
+      icon: FileText,
+      color: 'text-blue-400'
+    },
+    {
+      name: 'Client_Contract_Draft.pdf',
+      type: 'PDF',
+      size: '1.5 MB',
+      date: '2024-07-25',
+      icon: FileText,
+      color: 'text-red-400'
+    },
+    {
+      name: 'Product_Launch_Banner.png',
+      type: 'Image',
+      size: '4.1 MB',
+      date: '2024-07-24',
+      icon: Image,
+      color: 'text-green-400'
     }
   ];
 
@@ -144,7 +119,7 @@ const Dashboard: React.FC = () => {
             </div>
             
             <nav className="flex items-center gap-6 ml-8">
-              <Link to="/dashboard" className="px-4 py-2 bg-green-500 text-white rounded-lg font-medium">
+              <Link to="/dashboard" className="px-4 py-2 text-gray-300 hover:text-white transition-colors">
                 Dashboard
               </Link>
               <Link to="/documents" className="px-4 py-2 text-gray-300 hover:text-white transition-colors">
@@ -153,7 +128,7 @@ const Dashboard: React.FC = () => {
               <Link to="/images" className="px-4 py-2 text-gray-300 hover:text-white transition-colors">
                 Images
               </Link>
-              <Link to="/files" className="px-4 py-2 text-gray-300 hover:text-white transition-colors">
+              <Link to="/files" className="px-4 py-2 bg-green-500 text-white rounded-lg font-medium">
                 File Storage
               </Link>
             </nav>
@@ -223,7 +198,7 @@ const Dashboard: React.FC = () => {
         {/* Left Sidebar */}
         <aside className="w-64 bg-gray-800 min-h-screen p-6">
           <nav className="space-y-2">
-            <Link to="/dashboard" className="flex items-center gap-3 px-4 py-3 bg-green-500 text-white rounded-lg">
+            <Link to="/dashboard" className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg">
               <Grid3X3 className="w-5 h-5" />
               Dashboard
             </Link>
@@ -235,7 +210,7 @@ const Dashboard: React.FC = () => {
               <Image className="w-5 h-5" />
               Images
             </Link>
-            <Link to="/files" className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg">
+            <Link to="/files" className="flex items-center gap-3 px-4 py-3 bg-green-500 text-white rounded-lg">
               <Folder className="w-5 h-5" />
               File Storage
             </Link>
@@ -260,10 +235,10 @@ const Dashboard: React.FC = () => {
 
         {/* Main Content */}
         <main className="flex-1 p-8">
-          {/* Dashboard Header */}
+          {/* Page Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
-            <p className="text-gray-400">Your AI-powered file management overview.</p>
+            <h1 className="text-3xl font-bold text-white mb-2">File Storage</h1>
+            <p className="text-gray-400">Manage and organize your files with ease.</p>
           </div>
 
           {/* Storage Overview */}
@@ -296,28 +271,28 @@ const Dashboard: React.FC = () => {
             <div className="grid grid-cols-4 gap-4">
               <button className="flex flex-col items-center gap-3 p-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
                 <Upload className="w-6 h-6" />
-                <span className="font-medium">Upload Document</span>
-              </button>
-              <button className="flex flex-col items-center gap-3 p-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
-                <Image className="w-6 h-6" />
-                <span className="font-medium">Upload Image</span>
+                <span className="font-medium">Upload Files</span>
               </button>
               <button className="flex flex-col items-center gap-3 p-4 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors">
-                <FileText className="w-6 h-6" />
-                <span className="font-medium">Document AI Features</span>
+                <Folder className="w-6 h-6" />
+                <span className="font-medium">Create Folder</span>
               </button>
               <button className="flex flex-col items-center gap-3 p-4 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors">
-                <Image className="w-6 h-6" />
-                <span className="font-medium">Image AI Features</span>
+                <Search className="w-6 h-6" />
+                <span className="font-medium">Search Files</span>
+              </button>
+              <button className="flex flex-col items-center gap-3 p-4 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                <Download className="w-6 h-6" />
+                <span className="font-medium">Download All</span>
               </button>
             </div>
           </div>
 
-          {/* Recent AI Activity */}
+          {/* Recent Files */}
           <div className="bg-gray-800 rounded-lg border border-gray-700">
             <div className="p-6 border-b border-gray-700">
-              <h2 className="text-xl font-semibold text-white mb-2">AI Task Log</h2>
-              <p className="text-gray-400">View your recently processed AI tasks.</p>
+              <h2 className="text-xl font-semibold text-white mb-2">Recent Files</h2>
+              <p className="text-gray-400">Your recently uploaded and modified files.</p>
             </div>
             
             <div className="overflow-x-auto">
@@ -325,52 +300,52 @@ const Dashboard: React.FC = () => {
                 <thead className="bg-gray-700">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Task ID
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       File Name
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Task Type
+                      Type
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Status
+                      Size
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       Date
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Action
+                      Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-700">
-                  {aiTasks.map((task) => (
-                    <tr key={task.id} className="hover:bg-gray-700 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                        {task.id}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        {task.fileName}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        {task.taskType}
-                      </td>
+                  {recentFiles.map((file, index) => (
+                    <tr key={index} className="hover:bg-gray-700 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <task.icon className={`w-4 h-4 ${task.color}`} />
-                          <span className={`text-sm ${task.color}`}>
-                            {task.status}
-                          </span>
+                        <div className="flex items-center gap-3">
+                          <file.icon className={`w-5 h-5 ${file.color}`} />
+                          <span className="text-sm font-medium text-white">{file.name}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        {task.date}
+                        {file.type}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                        {file.size}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                        {file.date}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <button className="text-gray-400 hover:text-white">
-                          <ChevronRight className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button className="text-gray-400 hover:text-white">
+                            <Download className="w-4 h-4" />
+                          </button>
+                          <button className="text-gray-400 hover:text-white">
+                            <MoreVertical className="w-4 h-4" />
+                          </button>
+                          <button className="text-gray-400 hover:text-red-400">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -379,7 +354,7 @@ const Dashboard: React.FC = () => {
             </div>
             
             <div className="p-6 border-t border-gray-700">
-              <p className="text-gray-400 text-sm">A list of your recent AI-powered tasks.</p>
+              <p className="text-gray-400 text-sm">A list of your recently uploaded and modified files.</p>
             </div>
           </div>
         </main>
@@ -388,4 +363,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard;
+export default FileStorage;

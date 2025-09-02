@@ -37,17 +37,13 @@ api.interceptors.response.use(
 
 // Auth API endpoints
 export const authAPI = {
-  // User registration
-  register: (userData: {
-    username: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-    firstName: string;
-    lastName: string;
-  }) => api.post('/api/v1/users/register', userData),
+  // Public/Utility endpoints
+  getJwks: () => api.get('/auth/.well-known/jwks.json'),
+  getOpenIdConfiguration: () => api.get('/auth/.well-known/openid_configuration'),
+  getOAuth2Consent: (params: { client_id: string; scope: string; state: string }) => 
+    api.get('/auth/oauth2/consent', { params }),
 
-  // User login using custom auth endpoint
+  // Custom auth flow
   login: (credentials: {
     usernameOrEmail: string;
     password: string;
@@ -60,35 +56,90 @@ export const authAPI = {
     });
   },
 
+  refresh: (refreshToken: string) => 
+    api.post('/api/v1/auth/refresh', { refreshToken }),
+
+  // OAuth2 token refresh (alternate)
+  refreshOAuth2Token: (refreshToken: string) => 
+    api.post('/auth/oauth2/token/refresh', { refreshToken }),
+
   // User logout
   logout: () => api.post('/auth/api/v1/users/logout'),
+};
 
-  // Get user profile
+// User API endpoints
+export const userAPI = {
+  // Public endpoints
+  register: (userData: {
+    username: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    firstName: string;
+    lastName: string;
+  }) => api.post('/api/v1/users/register', userData),
+
+  verifyEmail: (token: string) => api.get(`/api/v1/users/verify-email?token=${token}`),
+
+  // Internal endpoints (called by auth service; gateway headers required)
+  verifyCredentials: (credentials: { username: string; password: string }) => 
+    api.post('/api/v1/users/verify-credentials', credentials),
+
+  getUserTokenClaims: (username: string) => 
+    api.get(`/api/v1/users/${username}/token-claims`),
+
+  getUserTokenClaimsById: (userId: string) => 
+    api.get(`/api/v1/users/id/${userId}/token-claims`),
+
+  getUserProfile: (username: string) => 
+    api.get(`/api/v1/users/${username}/profile`),
+
+  // Business endpoints (requires auth)
   getProfile: () => api.get('/api/v1/users/profile'),
 
-  // Update user profile
   updateProfile: (profileData: any) => api.put('/api/v1/users/profile', profileData),
 
-  // Change password
+  updateUserProfile: (userId: string, profileData: any) => 
+    api.put(`/api/v1/users/${userId}/profile`, profileData),
+
   changePassword: (passwords: {
     currentPassword: string;
     newPassword: string;
   }) => api.post('/api/v1/users/change-password', passwords),
 
-  // Forgot password
-  forgotPassword: (email: string) => api.post('/api/v1/users/forgot-password', { email }),
+  deleteUser: (userId: string) => api.delete(`/api/v1/users/${userId}`),
 
-  // Reset password
-  resetPassword: (data: {
-    token: string;
-    newPassword: string;
-  }) => api.post('/api/v1/users/reset-password', data),
+  getUserTokenClaimsByEmail: (email: string) => 
+    api.get(`/api/v1/users/email/${email}/token-claims`),
 
-  // Verify email
-  verifyEmail: (token: string) => api.get(`/api/v1/users/verify-email?token=${token}`),
+  googleRegister: (googleData: any) => api.post('/api/v1/users/google-register', googleData),
 
-  // Delete account
-  deleteAccount: () => api.delete('/api/v1/users/profile'),
+  // Admin endpoints (requires auth, admin)
+  getAdminUsers: () => api.get('/api/v1/admin/users'),
+
+  getAdminUsersStatistics: () => api.get('/api/v1/admin/users/statistics'),
+
+  toggleUserStatus: (username: string) => 
+    api.put(`/api/v1/admin/users/${username}/toggle`),
+
+  updateUserRoles: (username: string, roles: string[]) => 
+    api.put(`/api/v1/admin/users/${username}/roles`, { roles }),
+
+  deleteAdminUser: (username: string) => 
+    api.delete(`/api/v1/admin/users/${username}`),
+
+  getAdminUser: (username: string) => 
+    api.get(`/api/v1/admin/users/${username}`),
+};
+
+// Security test endpoints
+export const securityTestAPI = {
+  public: () => api.get('/api/v1/security-test/public'),
+  protected: () => api.get('/api/v1/security-test/protected'),
+  admin: () => api.get('/api/v1/security-test/admin'),
+  userData: (userId: string) => api.get(`/api/v1/security-test/user/${userId}/data`),
+  whoami: () => api.get('/api/v1/security-test/whoami'),
+  checkRole: (role: string) => api.get(`/api/v1/security-test/roles/check?role=${role}`),
 };
 
 // OAuth2 API endpoints

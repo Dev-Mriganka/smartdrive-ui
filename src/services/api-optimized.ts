@@ -1,4 +1,4 @@
-import tokenManager, { apiCall, apiCallJson } from './TokenManager';
+import tokenManager, { apiCall } from './TokenManager';
 
 /**
  * Optimized API Service for SmartDrive
@@ -42,7 +42,7 @@ async function makeRequest<T>(
     requestOptions.body = JSON.stringify(data);
   }
 
-  const response = await apiCall(url, requestOptions);
+  const response = await apiCall(url, requestOptions as any);
   
   if (!response) {
     throw new Error('Request failed - no response received');
@@ -228,7 +228,7 @@ export const aiAPI = {
 // OAuth2 API endpoints (legacy support)
 export const oauth2API = {
   // Get authorization URL
-  getAuthUrl: (params: {
+  getAuthUrl: (_params: {
     responseType: string;
     clientId: string;
     redirectUri: string;

@@ -1,107 +1,152 @@
-import React from 'react';
-import { useTheme } from '../contexts/ThemeContext';
+import React, { useEffect, useState } from 'react';
 
 const AnimatedBackground: React.FC = () => {
-  const { theme } = useTheme();
-  
-  return (
-    <div className="fixed inset-0 -z-10 overflow-hidden">
-      {/* Gradient Background */}
-      <div className={`absolute inset-0 ${
-        theme === 'light' 
-          ? 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50' 
-          : 'bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900'
-      }`}></div>
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    let animationFrameId: number;
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      // Throttle mouse movement updates using requestAnimationFrame
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
       
-      {/* Animated Grid Pattern */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, ${
-            theme === 'light' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(147, 197, 253, 0.1)'
-          } 1px, transparent 0)`,
-          backgroundSize: '40px 40px'
-        }}></div>
+      animationFrameId = requestAnimationFrame(() => {
+        setMousePosition({
+          x: e.clientX / window.innerWidth,
+          y: e.clientY / window.innerHeight,
+        });
+      });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, []);
+
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      {/* Single Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-900 dark:via-indigo-900 dark:to-purple-900"></div>
+
+      {/* Floating SVGs that respond to mouse movement */}
+      <div 
+        className="absolute top-1/4 left-1/4 transition-transform duration-1000 ease-out"
+        style={{
+          transform: `translate(${mousePosition.x * 20 - 10}px, ${mousePosition.y * 20 - 10}px)`
+        }}
+      >
+        <svg className="w-16 h-16 text-blue-400/30 dark:text-white/5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M19.35,10.04C18.67,6.59 15.64,4 12,4C9.11,4 6.6,5.64 5.35,8.04C2.34,8.36 0,10.91 0,14A6,6 0 0,0 6,20H19A5,5 0 0,0 24,15C24,12.36 21.95,10.22 19.35,10.04Z"/>
+        </svg>
       </div>
 
-      {/* Floating File Icons */}
-      <div className="absolute inset-0">
-        {/* File Icon 1 */}
-        <div className="absolute top-20 left-10 animate-float-slow opacity-20">
-          <svg className="w-12 h-12 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
-            <path d="M14 2v6h6"/>
-          </svg>
-        </div>
-
-        {/* File Icon 2 */}
-        <div className="absolute top-40 right-20 animate-float-medium opacity-30">
-          <svg className="w-8 h-8 text-indigo-400" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
-            <path d="M14 2v6h6"/>
-          </svg>
-        </div>
-
-        {/* File Icon 3 */}
-        <div className="absolute bottom-32 left-1/4 animate-float-fast opacity-25">
-          <svg className="w-10 h-10 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
-            <path d="M14 2v6h6"/>
-          </svg>
-        </div>
-
-        {/* File Icon 4 */}
-        <div className="absolute top-1/3 right-1/3 animate-float-slow opacity-20">
-          <svg className="w-6 h-6 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
-            <path d="M14 2v6h6"/>
-          </svg>
-        </div>
-
-        {/* File Icon 5 */}
-        <div className="absolute bottom-20 right-10 animate-float-medium opacity-30">
-          <svg className="w-9 h-9 text-indigo-300" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
-            <path d="M14 2v6h6"/>
-          </svg>
-        </div>
-
-        {/* File Icon 6 */}
-        <div className="absolute top-1/2 left-20 animate-float-fast opacity-25">
-          <svg className="w-7 h-7 text-purple-300" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
-            <path d="M14 2v6h6"/>
-          </svg>
-        </div>
-
-        {/* File Icon 7 */}
-        <div className="absolute bottom-1/3 right-1/4 animate-float-slow opacity-20">
-          <svg className="w-11 h-11 text-blue-200" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
-            <path d="M14 2v6h6"/>
-          </svg>
-        </div>
-
-        {/* File Icon 8 */}
-        <div className="absolute top-1/4 left-1/3 animate-float-medium opacity-30">
-          <svg className="w-8 h-8 text-indigo-200" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
-            <path d="M14 2v6h6"/>
-          </svg>
-        </div>
+      <div 
+        className="absolute top-3/4 right-1/4 transition-transform duration-1000 ease-out"
+        style={{
+          transform: `translate(${mousePosition.x * -15 + 7.5}px, ${mousePosition.y * -15 + 7.5}px)`
+        }}
+      >
+        <svg className="w-12 h-12 text-indigo-400/30 dark:text-white/5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+        </svg>
       </div>
 
-      {/* Floating Circles */}
-      <div className="absolute inset-0">
-        <div className={`absolute top-1/4 left-1/4 w-32 h-32 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse ${
-          theme === 'light' ? 'bg-blue-200' : 'bg-blue-600'
-        }`}></div>
-        <div className={`absolute top-1/3 right-1/4 w-24 h-24 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse ${
-          theme === 'light' ? 'bg-purple-200' : 'bg-purple-600'
-        }`} style={{animationDelay: '2s'}}></div>
-        <div className={`absolute bottom-1/4 left-1/3 w-28 h-28 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse ${
-          theme === 'light' ? 'bg-indigo-200' : 'bg-indigo-600'
-        }`} style={{animationDelay: '4s'}}></div>
+      <div 
+        className="absolute bottom-1/4 left-1/3 transition-transform duration-1000 ease-out"
+        style={{
+          transform: `translate(${mousePosition.x * 25 - 12.5}px, ${mousePosition.y * -20 + 10}px)`
+        }}
+      >
+        <svg className="w-20 h-20 text-purple-400/30 dark:text-white/5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/>
+        </svg>
       </div>
+
+      <div 
+        className="absolute top-1/2 right-1/3 transition-transform duration-1000 ease-out"
+        style={{
+          transform: `translate(${mousePosition.x * -30 + 15}px, ${mousePosition.y * 15 - 7.5}px)`
+        }}
+      >
+        <svg className="w-14 h-14 text-blue-400/30 dark:text-white/5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12,2L13.09,8.26L22,9L13.09,9.74L12,16L10.91,9.74L2,9L10.91,8.26L12,2Z"/>
+        </svg>
+      </div>
+
+      <div 
+        className="absolute top-1/6 right-1/6 transition-transform duration-1000 ease-out"
+        style={{
+          transform: `translate(${mousePosition.x * 18 - 9}px, ${mousePosition.y * -18 + 9}px)`
+        }}
+      >
+        <svg className="w-10 h-10 text-indigo-400/30 dark:text-white/5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12,2L13.09,8.26L22,9L13.09,9.74L12,16L10.91,9.74L2,9L10.91,8.26L12,2Z"/>
+        </svg>
+      </div>
+
+      <div 
+        className="absolute bottom-1/6 left-1/6 transition-transform duration-1000 ease-out"
+        style={{
+          transform: `translate(${mousePosition.x * -22 + 11}px, ${mousePosition.y * 22 - 11}px)`
+        }}
+      >
+        <svg className="w-8 h-8 text-purple-400/30 dark:text-white/5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M19.35,10.04C18.67,6.59 15.64,4 12,4C9.11,4 6.6,5.64 5.35,8.04C2.34,8.36 0,10.91 0,14A6,6 0 0,0 6,20H19A5,5 0 0,0 24,15C24,12.36 21.95,10.22 19.35,10.04Z"/>
+        </svg>
+      </div>
+
+      <div 
+        className="absolute top-2/3 left-1/2 transition-transform duration-1000 ease-out"
+        style={{
+          transform: `translate(${mousePosition.x * 12 - 6}px, ${mousePosition.y * -12 + 6}px)`
+        }}
+      >
+        <svg className="w-18 h-18 text-blue-400/30 dark:text-white/5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+        </svg>
+      </div>
+
+      <div 
+        className="absolute top-1/3 right-1/4 transition-transform duration-1000 ease-out"
+        style={{
+          transform: `translate(${mousePosition.x * -8 + 4}px, ${mousePosition.y * 8 - 4}px)`
+        }}
+      >
+        <svg className="w-22 h-22 text-indigo-400/30 dark:text-white/5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12,2L13.09,8.26L22,9L13.09,9.74L12,16L10.91,9.74L2,9L10.91,8.26L12,2Z"/>
+        </svg>
+      </div>
+
+      <div 
+        className="absolute bottom-1/3 left-1/4 transition-transform duration-1000 ease-out"
+        style={{
+          transform: `translate(${mousePosition.x * 16 - 8}px, ${mousePosition.y * -16 + 8}px)`
+        }}
+      >
+        <svg className="w-11 h-11 text-purple-400/30 dark:text-white/5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M19.35,10.04C18.67,6.59 15.64,4 12,4C9.11,4 6.6,5.64 5.35,8.04C2.34,8.36 0,10.91 0,14A6,6 0 0,0 6,20H19A5,5 0 0,0 24,15C24,12.36 21.95,10.22 19.35,10.04Z"/>
+        </svg>
+      </div>
+
+      <div 
+        className="absolute top-1/2 right-1/6 transition-transform duration-1000 ease-out"
+        style={{
+          transform: `translate(${mousePosition.x * -14 + 7}px, ${mousePosition.y * 14 - 7}px)`
+        }}
+      >
+        <svg className="w-13 h-13 text-blue-400/30 dark:text-white/5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/>
+        </svg>
+      </div>
+
+      {/* Subtle overlay for depth */}
+      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/5 dark:to-white/5"></div>
     </div>
   );
 };
